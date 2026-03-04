@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>활동 인증하기 - 국민체력100</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --main-blue: #0064d2; 
+            --bg-gradient: linear-gradient(145deg, #006add 0%, #003a8c 100%);
+            --card-white: rgba(255, 255, 255, 0.98);
+            --text-main: #1a2a3a;
+            --text-sub: #5d6d7e;
+            --pure-white: #ffffff;
+        }
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background: var(--bg-gradient); background-attachment: fixed; color: var(--pure-white); }
+        header { padding: 40px 24px 20px; text-align: center; }
+        .container { padding: 0 20px 50px; }
+        .card { background: var(--card-white); border-radius: 20px; color: var(--text-main); margin-bottom: 20px; padding: 40px 22px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .qr-placeholder { font-size: 5rem; color: var(--main-blue); margin-bottom: 20px; }
+        .footer-guide { text-align: center; margin-top: 20px; }
+        .footer-guide span { display: block; color: #ffcc00; font-weight: 700; margin-bottom: 5px; }
+        .main-btn { display: block; background: #ffcc00; color: #1a2a3a; text-align: center; padding: 18px; border-radius: 15px; font-weight: 700; text-decoration: none; margin-top: 20px; border: none; width: 100%; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <header><h1>활동 인증하기</h1></header>
+    <div class="container">
+        <div class="card">
+            <div class="qr-placeholder"><i class="fa-solid fa-qrcode"></i></div>
+            <h2 style="font-size: 1.2rem; margin-bottom: 10px;">QR 코드 스캔</h2>
+            <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.5;">시설에 비치된 인증 QR코드를<br>카메라로 비춰주세요.</p>
+        </div>
+        <div class="footer-guide">
+            <span>인증 주의사항</span>
+            <p style="font-size:0.85rem; opacity:0.9">1일 1회, 주 최대 3회 적립이 가능합니다.<br>인증 후 포인트는 즉시 지급됩니다.</p>
+        </div>
+        <button class="main-btn">스캔 시작하기</button>
+    </div>
+</body>
+</html>
