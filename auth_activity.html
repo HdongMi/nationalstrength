@@ -6,6 +6,7 @@
     <title>활동 인증하기 - 국민체력100</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
             --main-blue: #0064d2; 
@@ -13,31 +14,108 @@
             --card-white: rgba(255, 255, 255, 0.98);
             --text-main: #1a2a3a;
             --text-sub: #5d6d7e;
-            --pure-white: #ffffff;
         }
-        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background: var(--bg-gradient); background-attachment: fixed; color: var(--pure-white); }
+        body { font-family: 'Noto Sans KR', sans-serif; margin: 0; background: var(--bg-gradient); background-attachment: fixed; color: #fff; overflow-x: hidden; }
         header { padding: 40px 24px 20px; text-align: center; }
         .container { padding: 0 20px 50px; }
-        .card { background: var(--card-white); border-radius: 20px; color: var(--text-main); margin-bottom: 20px; padding: 40px 22px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .qr-placeholder { font-size: 5rem; color: var(--main-blue); margin-bottom: 20px; }
-        .footer-guide { text-align: center; margin-top: 20px; }
-        .footer-guide span { display: block; color: #ffcc00; font-weight: 700; margin-bottom: 5px; }
-        .main-btn { display: block; background: #ffcc00; color: #1a2a3a; text-align: center; padding: 18px; border-radius: 15px; font-weight: 700; text-decoration: none; margin-top: 20px; border: none; width: 100%; font-size: 1.1rem; }
+        
+        .card { 
+            background: var(--card-white); border-radius: 24px; color: var(--text-main); 
+            margin-bottom: 20px; padding: 30px 20px; text-align: center; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+        }
+
+        /* 카메라 뷰파인더 스타일 */
+        #reader {
+            width: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: #000;
+            display: none; /* 스캔 시작 전에는 숨김 */
+        }
+
+        .qr-placeholder { font-size: 5rem; color: var(--main-blue); margin-bottom: 20px; opacity: 0.9; }
+        .footer-guide { text-align: center; margin-top: 30px; }
+        .footer-guide span { display: block; color: #ffcc00; font-weight: 700; margin-bottom: 8px; font-size: 1.1rem; }
+        
+        .main-btn { 
+            display: block; background: #ffcc00; color: #1a2a3a; text-align: center; 
+            padding: 20px; border-radius: 18px; font-weight: 700; text-decoration: none; 
+            margin-top: 25px; border: none; width: 100%; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .main-btn:active { transform: scale(0.98); }
+
+        /* 라이브러리 내부 UI 숨기기 (깔끔하게) */
+        #reader__dashboard, #reader__status_span { display: none !important; }
+        video { object-fit: cover !important; }
     </style>
 </head>
 <body>
-    <header><h1>활동 인증하기</h1></header>
+    <header><h1 style="font-size: 1.5rem; letter-spacing: -1px;">활동 인증하기</h1></header>
+    
     <div class="container">
         <div class="card">
-            <div class="qr-placeholder"><i class="fa-solid fa-qrcode"></i></div>
-            <h2 style="font-size: 1.2rem; margin-bottom: 10px;">QR 코드 스캔</h2>
-            <p style="font-size: 0.9rem; color: var(--text-sub); line-height: 1.5;">시설에 비치된 인증 QR코드를<br>카메라로 비춰주세요.</p>
+            <div id="reader"></div>
+            
+            <div id="default-ui">
+                <div class="qr-placeholder"><i class="fa-solid fa-qrcode"></i></div>
+                <h2 style="font-size: 1.3rem; margin-bottom: 12px; font-weight: 700;">QR 코드 스캔</h2>
+                <p style="font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; word-break: keep-all;">
+                    시설에 비치된 인증 QR코드를<br>카메라 사각형 안에 맞춰주세요.
+                </p>
+            </div>
         </div>
+
         <div class="footer-guide">
             <span>인증 주의사항</span>
-            <p style="font-size:0.85rem; opacity:0.9">1일 1회, 주 최대 3회 적립이 가능합니다.<br>인증 후 포인트는 즉시 지급됩니다.</p>
+            <p style="font-size:0.9rem; opacity:0.9; line-height: 1.5;">
+                1일 1회, 주 최대 3회 적립이 가능합니다.<br>인증 후 포인트는 즉시 지급됩니다.
+            </p>
         </div>
-        <button class="main-btn">스캔 시작하기</button>
+
+        <button class="main-btn" onclick="startScan()">스캔 시작하기</button>
     </div>
+
+    <script>
+        let html5QrCode;
+
+        async function startScan() {
+            const readerDiv = document.getElementById('reader');
+            const defaultUi = document.getElementById('default-ui');
+            
+            readerDiv.style.display = 'block';
+            defaultUi.style.display = 'none';
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            const qrCodeSuccessCallback = (decodedText, decodedResult) => {
+                // 스캔 성공 시 진동 (모바일 지원 브라우저만)
+                if (navigator.vibrate) navigator.vibrate(100);
+                
+                alert("✅ 인증 완료!\n포인트가 성공적으로 적립되었습니다.");
+                
+                html5QrCode.stop().then(() => {
+                    location.reload(); 
+                });
+            };
+
+            const config = { 
+                fps: 15, 
+                qrbox: { width: 250, height: 250 },
+                // 모바일에서 영상이 찌그러지지 않게 설정
+                aspectRatio: 1.0 
+            };
+
+            // environment: 후면 카메라 강제 지정
+            html5QrCode.start({ facingMode: "environment" }, config, qrCodeSuccessCallback)
+                .catch((err) => {
+                    console.error(err);
+                    alert("카메라를 켤 수 없습니다.\n설정에서 카메라 권한을 허용해주세요.");
+                    location.reload();
+                });
+        }
+    </script>
 </body>
 </html>
